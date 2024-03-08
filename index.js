@@ -9,6 +9,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({
     origin:'*'
 }))
+
+app.get('/',(req,res)=> res.send('hello') )
 app.post('/checkoutCustom',async(req,res)=>{
     const data = req.body.data
     const items = req.body.items
@@ -16,13 +18,7 @@ app.post('/checkoutCustom',async(req,res)=>{
     const detailUser = req.body.user
     const timeExpired = req.body.expired
     const idOrder = detailUser.first_name+'-'+Math.floor(Math.random()*100)+1
-    const midtransClient = require('midtrans-client')
-    let snap = new midtransClient.Snap({
-        isProduction : false,
-        serverKey : process.env.MIDTRANS_SERVER_KEY,
-        clientKeyKey : process.env.MIDTRANS_CLIENT_KEY,
-    })
-    console.log(process.env.MIDTRANS_SERVER_KEY)
+    console.log('Total equal amount: ',total===items.reduce((total,item)=> total+(item.quantity*item.price),0))
     let parameter = {
         ...data,
         "transaction_details": {
@@ -49,7 +45,6 @@ app.post('/checkoutCustom',async(req,res)=>{
             body:JSON.stringify(parameter)
         })
         const result = await snapData.json()
-        console.log(result)
         if(typeof result==='object' && result.status_code==='200' || result.status_code==='201') return res.json(result)
         return res.send('error').status(500)
         
@@ -74,7 +69,6 @@ app.get('/checkStat',(req,res)=>{
 app.get('/changeStat',(req,res)=>{
     const order_id = req?.query?.orderId
     const status = req?.query?.status
-    console.log(order_id,status)
     fetch(`https://api.sandbox.midtrans.com/v2/${order_id}/${status}`,{
         method:'POST',
         headers:{
@@ -125,12 +119,6 @@ app.post('/checkout', async function (req, res) {
     const snapData = await snap.createTransaction(parameter)
     if(snapData.token) return res.json({...snapData, orderId:idOrder})
     return res.send('Error').status(500)
-    // console.log(snapData)
-        // .then((transaction)=>{
-        //     // transaction token
-        //     let transactionToken = transaction.token;
-        //     console.log('transactionToken:',transactionToken);
-        // })
 })
 
 app.listen(port,()=>{
