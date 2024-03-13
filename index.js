@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const { v4: uuidv4 } = require('uuid');
 var bodyParser = require('body-parser')
 require('dotenv').config()
 const port = 5000
@@ -17,7 +18,8 @@ app.post('/checkoutCustom',async(req,res)=>{
     const total = req.body.total
     const detailUser = req.body.user
     const timeExpired = req.body.expired
-    const idOrder = detailUser.first_name+'-'+Math.floor(Math.random()*100)+1
+    const idOrder = detailUser.first_name+'-'+uuidv4()
+    console.log('amount: ',total,items.reduce((total,item)=> total+(item.quantity*item.price),0))
     console.log('Total equal amount: ',total===items.reduce((total,item)=> total+(item.quantity*item.price),0))
     let parameter = {
         ...data,
@@ -45,6 +47,7 @@ app.post('/checkoutCustom',async(req,res)=>{
             body:JSON.stringify(parameter)
         })
         const result = await snapData.json()
+        console.log(result)
         if(typeof result==='object' && result.status_code==='200' || result.status_code==='201') return res.json(result)
         return res.send('error').status(500)
         
