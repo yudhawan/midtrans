@@ -14,14 +14,35 @@ app.use(cors({
 app.get('/',(req,res)=> res.send('hello') )
 app.post('/checkoutCustom',async(req,res)=>{
     const data = req.body.data
+    const type = req.body.type
     const items = req.body.items
     const total = req.body.total
     const detailUser = req.body.user
     const timeExpired = req.body.expired
     const idOrder = detailUser.first_name+'-'+uuidv4()
-    console.log('amount: ',total,items.reduce((total,item)=> total+(item.quantity*item.price),0))
-    console.log('Total equal amount: ',total===items.reduce((total,item)=> total+(item.quantity*item.price),0))
-    let parameter = {
+
+    const headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Authorization": `Basic ${btoa(`${type==='xendit'?process.env.XENDIT_API_KEY:process.env.MIDTRANS_SERVER_KEY}:`)}`
+    }
+
+    const url = type==='xendit'?'https://api.xendit.co/ewallets/charges':'https://api.sandbox.midtrans.com/v2/charge'
+    
+    let parameter = type==='xendit'?{
+        ...data,
+        "reference_id": idOrder,
+        "currency": "IDR",
+        "checkout_method": "ONE_TIME_PAYMENT",
+        "channel_properties": {
+            "mobile_number":"+62851618101223",
+            "success_redirect_url": "https://redirect.me/payment"
+            },
+        "metadata": {
+            "branch_area": "PLUIT",
+            "branch_city": "JAKARTA"
+            }
+    }:{
         ...data,
         "transaction_details": {
             "order_id": idOrder,
@@ -37,18 +58,13 @@ app.post('/checkoutCustom',async(req,res)=>{
         
     }
     try {
-        const snapData = await fetch('https://api.sandbox.midtrans.com/v2/charge',{
+        const snapData = await fetch(url,{
             method:'POST',
-            headers:{
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                "Authorization": `Basic ${btoa(`${process.env.MIDTRANS_SERVER_KEY}:`)}`
-            },
+            headers:headers,
             body:JSON.stringify(parameter)
         })
         const result = await snapData.json()
-        console.log(result)
-        if(typeof result==='object' && result.status_code==='200' || result.status_code==='201') return res.json(result)
+        if(typeof result==='object' && result.status_code==='200' || result.status_code==='201' || result.id) return res.json(result)
         return res.send('error').status(500)
         
     } catch (error) {
