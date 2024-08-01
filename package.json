@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js&&prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.17.0",
