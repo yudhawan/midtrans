@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model AttributBanner {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+}
+
+model Banners {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  dir   String
+  image String
+}
+
+model Categories {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  category String
+}
+
+model ModelData {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  nama  String
+  texts String
+}
+
+model Orders {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+}
+
+model Points {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+}
+
+model Products {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  category     String
+  description  String
+  images       String
+  price        BigInt
+  product_name String
+  quantity     BigInt
+  sub          String
+}
+
+model SubCategory {
+  id  String @id @default(auto()) @map("_id") @db.ObjectId
+  sub String
+}
+
+model Testimonies {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+}
+
+model Users {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  alamat_lengkap String
+  date           DateTime @db.Date
+  email          String
+  fb             String
+  ig             String
+  kode_ref       String
+  kota           String
+  nama           String
+  nama_lengkap   String
+  password       String
+  picture        String?
+  shoope         String
+  status         String
+  token          String?
+  ttl            DateTime @db.Date
+  verification   BigInt
+  wa             String
+  wilayah        String
+}

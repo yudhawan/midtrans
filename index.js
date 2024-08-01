@@ -2,16 +2,22 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const { v4: uuidv4 } = require('uuid');
+const {PrismaClient} = require('@prisma/client')
 var bodyParser = require('body-parser')
 require('dotenv').config()
-const port = 5000
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
     origin:'*'
 }))
+const prisma = new PrismaClient()
+const port = 5000
 
-app.get('/',(req,res)=> res.send('hello') )
+app.get('/',async(req,res)=> {
+    const users = await prisma.users.findMany()
+    
+    return res.json({data:users.length})
+})
 app.post('/checkoutCustom',async(req,res)=>{
     const data = req.body.data
     const type = req.body.type
